@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LibraryScreen } from '../screens/LibraryScreen';
 import { CameraScreen } from '../screens/CameraScreen';
@@ -26,7 +26,7 @@ const defaultScreenOptions = {
   headerTitleStyle: typography.subtitle,
 };
 
-export const RootNavigator = (): JSX.Element => (
+export const RootNavigator = (): ReactElement => (
   <Stack.Navigator initialRouteName="Library" screenOptions={defaultScreenOptions}>
     <Stack.Screen
       name="Library"

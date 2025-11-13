@@ -2,6 +2,14 @@ import * as SQLite from 'expo-sqlite';
 import { QueuedScan } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
+type QueuedScanRow = {
+  id: string;
+  image_uri: string;
+  created_at: number;
+  status: 'pending' | 'processing';
+  item_id?: string | null;
+};
+
 const getDatabase = async () => {
   const db = await SQLite.openDatabaseAsync('omnilens.db');
   await db.execAsync('PRAGMA journal_mode = WAL;');
@@ -39,7 +47,7 @@ export const enqueueScan = async (imageUri: string, itemId: string | null): Prom
 
 export const getQueuedScans = async (): Promise<QueuedScan[]> => {
   const db = await getDatabase();
-  const rows = await db.getAllAsync('SELECT * FROM queued_scans ORDER BY created_at ASC');
+  const rows = await db.getAllAsync<QueuedScanRow>('SELECT * FROM queued_scans ORDER BY created_at ASC');
   return rows.map((row) => ({
     id: row.id,
     imageUri: row.image_uri,

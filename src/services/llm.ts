@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { LlmAnalysisResult } from '../types';
 
 const API_URL = process.env.EXPO_PUBLIC_LLM_ENDPOINT ?? 'https://example.com/analyze';
