@@ -1,0 +1,110 @@
+import { Collection, OmniItem, QueuedScan } from '../types';
+
+const now = Date.now();
+
+export const mockCollections: Collection[] = [
+  {
+    id: 'col-default',
+    name: 'My Library',
+    description: 'All captures land here by default.',
+    createdAt: now - 1000 * 60 * 60 * 24 * 7,
+    updatedAt: now - 1000 * 60 * 60 * 24 * 2,
+  },
+  {
+    id: 'col-recipes',
+    name: 'Recipe Box',
+    description: 'Scanned cards plus annotated cookbooks.',
+    createdAt: now - 1000 * 60 * 60 * 24 * 4,
+    updatedAt: now - 1000 * 60 * 60 * 2,
+  },
+  {
+    id: 'col-lab',
+    name: 'Field Research',
+    description: 'Whiteboard notes and lab readouts.',
+    createdAt: now - 1000 * 60 * 60 * 24 * 3,
+    updatedAt: now - 1000 * 60 * 60,
+  },
+];
+
+export const mockItems: OmniItem[] = [
+  {
+    id: 'item-01',
+    imageUri: 'https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=512&q=80',
+    createdAt: now - 1000 * 60 * 60 * 9,
+    updatedAt: now - 1000 * 60 * 60 * 7,
+    title: 'Raspberry Pistachio Tart',
+    notes: 'Needs less sugar, add rosemary infused syrup.',
+    ocrText: 'Ingredients: crust, raspberry jam, pistachio cream...',
+    category: 'Recipe',
+    tags: ['dessert', 'test-bake'],
+    identifiedObjects: ['mixing bowl', 'offset spatula'],
+    collectionId: 'col-recipes',
+    status: 'ready',
+  },
+  {
+    id: 'item-02',
+    imageUri: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=512&q=80',
+    createdAt: now - 1000 * 60 * 60 * 24,
+    updatedAt: now - 1000 * 60 * 60 * 18,
+    title: 'Marker Sketch: Retail Shelf',
+    notes: 'Highlight callouts for scent story and QR placement.',
+    ocrText: 'Hero copy: "Breathe easier".',
+    category: 'Concept Art',
+    tags: ['in-store', 'journey map'],
+    identifiedObjects: ['shelf', 'product stand'],
+    collectionId: 'col-lab',
+    status: 'ready',
+  },
+  {
+    id: 'item-03',
+    imageUri: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=512&q=80',
+    createdAt: now - 1000 * 60 * 60 * 30,
+    updatedAt: now - 1000 * 60 * 60 * 26,
+    title: 'UX Audit Notes',
+    notes: 'Steps 3-4 confuse first time users; add inline helper.',
+    ocrText: '"Reduce cognitive load on product compare step."',
+    category: 'Research',
+    tags: ['ux', 'audit', 'priority-a'],
+    identifiedObjects: ['notebook', 'pen'],
+    collectionId: 'col-lab',
+    status: 'ready',
+  },
+  {
+    id: 'item-04',
+    imageUri: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=512&q=80',
+    createdAt: now - 1000 * 60 * 60 * 5,
+    updatedAt: now - 1000 * 60 * 60 * 4,
+    title: 'Queued botanical capture',
+    notes: '',
+    ocrText: '',
+    category: 'Unsorted',
+    tags: ['queued'],
+    identifiedObjects: ['flower', 'leaf'],
+    collectionId: 'col-default',
+    status: 'queued',
+  },
+  {
+    id: 'item-05',
+    imageUri: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=512&q=80',
+    createdAt: now - 1000 * 60 * 60 * 2,
+    updatedAt: now - 1000 * 60 * 60 * 2,
+    title: 'Processing schematic',
+    notes: 'LLM enrichment pending.',
+    ocrText: '',
+    category: 'Draft',
+    tags: ['processing'],
+    identifiedObjects: ['blueprint'],
+    collectionId: 'col-default',
+    status: 'processing',
+  },
+];
+
+export const mockQueuedScans: QueuedScan[] = [
+  {
+    id: 'scan-01',
+    imageUri: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=512&q=80',
+    createdAt: now - 1000 * 60 * 45,
+    itemId: 'item-04',
+    status: 'pending',
+  },
+];

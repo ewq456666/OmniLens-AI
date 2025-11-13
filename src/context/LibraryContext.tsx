@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { Collection, LlmAnalysisResult, OmniItem, QueuedScan } from '../types';
+import { mockCollections, mockItems, mockQueuedScans } from '../data/mockData';
 import {
   createCollection,
   createItem,
@@ -42,6 +43,241 @@ export const useLibrary = (): LibraryContextValue => {
 };
 
 const DEFAULT_COLLECTION_NAME = 'My Library';
+const DESIGN_MODE_ENABLED = (process.env.EXPO_PUBLIC_USE_MOCK_DATA ?? 'true') === 'true';
+
+const getDefaultCollectionId = (collectionList: Collection[]): string | null => {
+  const defaultCollection = collectionList.find((collection) => collection.name === DEFAULT_COLLECTION_NAME);
+  return defaultCollection?.id ?? collectionList[0]?.id ?? null;
+};
+
+type SuggestionPreset = {
+  title: string;
+  summary: string;
+  ocr: string;
+  category: string;
+  tags: string[];
+  objects: string[];
+};
+
+const SUGGESTION_PRESETS: SuggestionPreset[] = [
+  {
+    title: 'Storyboard sprint notes',
+    summary: 'Call out timing tweaks for onboarding hero moment.',
+    ocr: 'Frame 02: fade to copy, emphasize device silhouette.',
+    category: 'Research',
+    tags: ['ux', 'storyboard'],
+    objects: ['whiteboard', 'marker'],
+  },
+  {
+    title: 'Field kit packing list',
+    summary: 'Checklist for botanical scouting trip to Marin.',
+    ocr: 'Macro lens, silica packets, color reference card.',
+    category: 'Checklist',
+    tags: ['outdoor', 'prep'],
+    objects: ['camera', 'bag'],
+  },
+  {
+    title: 'Retail journey sketch',
+    summary: 'Flow showing scent discovery wall with QR cues.',
+    ocr: 'Step 3: prompt for profile + save to cloud locker.',
+    category: 'Concept Art',
+    tags: ['journey', 'ar'],
+    objects: ['sketch', 'sticky note'],
+  },
+];
+
+const wait = (ms = 120) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const MockLibraryProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const [items, setItems] = useState<OmniItem[]>(mockItems);
+  const [collections, setCollections] = useState<Collection[]>(mockCollections);
+  const [queuedScans, setQueuedScans] = useState<QueuedScan[]>(mockQueuedScans);
+
+  const defaultCollectionId = useMemo(() => getDefaultCollectionId(collections), [collections]);
+
+  const refresh = useCallback(async () => {
+    await wait();
+    setItems((prev) => [...prev].sort((a, b) => b.createdAt - a.createdAt));
+  }, []);
+
+  const addCollection = useCallback<LibraryContextValue['addCollection']>(async (collection) => {
+    const timestamp = Date.now();
+    const created: Collection = {
+      ...collection,
+      id: `mock-col-${timestamp}`,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    setCollections((prev) => [...prev, created]);
+    await wait(80);
+  }, []);
+
+  const editCollection = useCallback<LibraryContextValue['editCollection']>(async (id, updates) => {
+    setCollections((prev) =>
+      prev.map((col) => (col.id === id ? { ...col, ...updates, updatedAt: Date.now() } : col)),
+    );
+    await wait(60);
+  }, []);
+
+  const removeCollection = useCallback<LibraryContextValue['removeCollection']>(
+    async (id) => {
+      if (id === defaultCollectionId) {
+        Alert.alert('Protected collection', 'The default collection cannot be deleted during design mode.');
+        return;
+      }
+      setCollections((prev) => prev.filter((col) => col.id !== id));
+      setItems((prev) => prev.map((item) => (item.collectionId === id ? { ...item, collectionId: null } : item)));
+      await wait(60);
+    },
+    [defaultCollectionId],
+  );
+
+  const addScan = useCallback<LibraryContextValue['addScan']>(
+    async ({ imageUri, collectionId }) => {
+      const timestamp = Date.now();
+      const targetCollection =
+        typeof collectionId === 'undefined' ? defaultCollectionId : collectionId ?? null;
+      const placeholder: OmniItem = {
+        id: `mock-item-${timestamp}`,
+        imageUri,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        title: 'Processing capture',
+        notes: '',
+        ocrText: '',
+        category: 'Unsorted',
+        tags: [],
+        identifiedObjects: [],
+        collectionId: targetCollection,
+        status: 'processing',
+      };
+
+      const queuedRecord: QueuedScan = {
+        id: `mock-scan-${timestamp}`,
+        imageUri,
+        createdAt: timestamp,
+        status: 'pending',
+        itemId: placeholder.id,
+      };
+
+      setItems((prev) => [placeholder, ...prev]);
+      setQueuedScans((prev) => [...prev, queuedRecord]);
+
+      setTimeout(() => {
+        const preset = SUGGESTION_PRESETS[Math.floor(Math.random() * SUGGESTION_PRESETS.length)];
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === placeholder.id
+              ? {
+                  ...item,
+                  title: preset.title,
+                  notes: preset.summary,
+                  ocrText: preset.ocr,
+                  category: preset.category,
+                  tags: preset.tags,
+                  identifiedObjects: preset.objects,
+                  status: 'ready',
+                  updatedAt: Date.now(),
+                }
+              : item,
+          ),
+        );
+        setQueuedScans((prev) => prev.filter((scan) => scan.id !== queuedRecord.id));
+      }, 1200);
+
+      await wait(40);
+      return placeholder;
+    },
+    [defaultCollectionId],
+  );
+
+  const editItem = useCallback<LibraryContextValue['editItem']>(async (id, updates) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              ...updates,
+              updatedAt: Date.now(),
+            }
+          : item,
+      ),
+    );
+    await wait(40);
+  }, []);
+
+  const removeItem = useCallback<LibraryContextValue['removeItem']>(async (id) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+    await wait(30);
+  }, []);
+
+  const runSearch = useCallback<LibraryContextValue['runSearch']>(
+    async (query, filters) => {
+      await wait(60);
+      const trimmed = query.trim().toLowerCase();
+      return items.filter((item) => {
+        if (trimmed) {
+          const haystack = `${item.title} ${item.notes} ${item.ocrText}`.toLowerCase();
+          if (!haystack.includes(trimmed)) {
+            return false;
+          }
+        }
+        if (filters?.category && item.category !== filters.category) {
+          return false;
+        }
+        if (filters?.collectionId && item.collectionId !== filters.collectionId) {
+          return false;
+        }
+        if (filters?.tags && filters.tags.length > 0) {
+          const lowerTags = filters.tags.map((tag) => tag.toLowerCase());
+          const searchableTags = [item.category, ...item.tags].map((tag) => tag.toLowerCase());
+          const hasAllTags = lowerTags.every((tag) => searchableTags.some((value) => value.includes(tag)));
+          if (!hasAllTags) {
+            return false;
+          }
+        }
+        return true;
+      });
+    },
+    [items],
+  );
+
+  const value = useMemo(
+    () => ({
+      items,
+      collections,
+      queuedScans,
+      defaultCollectionId,
+      refresh,
+      addCollection,
+      editCollection,
+      removeCollection,
+      addScan,
+      editItem,
+      removeItem,
+      runSearch,
+    }),
+    [
+      items,
+      collections,
+      queuedScans,
+      defaultCollectionId,
+      refresh,
+      addCollection,
+      editCollection,
+      removeCollection,
+      addScan,
+      editItem,
+      removeItem,
+      runSearch,
+    ],
+  );
+
+  return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;
+};
 
 const ensureDefaultCollection = async (): Promise<string> => {
   const collections = await getCollections();
@@ -57,6 +293,10 @@ const ensureDefaultCollection = async (): Promise<string> => {
 };
 
 export const LibraryProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  if (DESIGN_MODE_ENABLED) {
+    return <MockLibraryProvider>{children}</MockLibraryProvider>;
+  }
+
   const [items, setItems] = useState<OmniItem[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [queuedScans, setQueuedScans] = useState<QueuedScan[]>([]);

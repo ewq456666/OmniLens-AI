@@ -55,6 +55,12 @@ OmniLens AI is a cross-platform React Native (Expo) application that turns physi
    npm run lint
    ```
 
+## Design mode & mock data
+
+- The app now boots with curated mock collections/items so UI/UX can be finalized without wiring storage or the LLM endpoint. This mode is enabled by default via the new `EXPO_PUBLIC_USE_MOCK_DATA` flag.
+- To keep design data active, ensure your `.env` contains `EXPO_PUBLIC_USE_MOCK_DATA=true`. Remote image URLs in `src/data/mockData.ts` drive the gallery cards.
+- When you're ready to integrate the real SQLite + LLM flow, set `EXPO_PUBLIC_USE_MOCK_DATA=false`, provide a valid `EXPO_PUBLIC_LLM_ENDPOINT`, and restart Expo (`npm run start -- --clear`) so Metro picks up the new env vars.
+
 ## 📱 Feature Walkthrough
 
 1. **Library (default)**
