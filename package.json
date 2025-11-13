@@ -1,0 +1,47 @@
+{
+  "name": "omnilens-ai",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@expo-google-fonts/inter": "^0.2.3",
+    "@expo/vector-icons": "^14.0.0",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "@react-navigation/native": "^6.1.9",
+    "@react-navigation/native-stack": "^6.9.17",
+    "expo": "^50.0.0",
+    "expo-camera": "^14.0.0",
+    "expo-file-system": "^16.0.0",
+    "expo-font": "^12.0.0",
+    "expo-image-picker": "^15.0.0",
+    "expo-media-library": "^16.0.0",
+    "expo-sharing": "^12.0.0",
+    "expo-sqlite": "^12.0.0",
+    "expo-status-bar": "^1.11.0",
+    "react": "18.2.0",
+    "react-native": "0.73.0",
+    "react-native-gesture-handler": "^2.14.0",
+    "react-native-safe-area-context": "^4.7.4",
+    "react-native-screens": "^3.29.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@types/react": "^18.2.55",
+    "@types/react-native": "^0.73.0",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.34.0",
+    "typescript": "^5.3.3"
+  }
+}
